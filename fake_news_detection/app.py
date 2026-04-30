@@ -1,7 +1,5 @@
 import os
-import pickle
 import re
-
 import nltk
 import pandas as pd
 import streamlit as st
@@ -9,7 +7,7 @@ from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 
 # -----------------------------
-# DOWNLOAD NLTK RESOURCES
+# NLTK SETUP
 # -----------------------------
 nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
@@ -19,13 +17,6 @@ nltk.download('wordnet', quiet=True)
 # PATH SETUP
 # -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-MODEL_FILES = {
-    'lr_model': 'lr_model.pkl',
-    'rf_model': 'rf_model.pkl',
-    'tfidf': 'tfidf.pkl',
-    'tokenizer': 'tokenizer.pkl',
-}
 
 def data_path(filename):
     return os.path.join(BASE_DIR, filename)
@@ -50,13 +41,13 @@ def preprocess_text(text):
     )
 
 # -----------------------------
-# LOAD DATASET (FIXED)
+# LOAD DATASET (SAFE VERSION)
 # -----------------------------
 def load_test_data():
     path = data_path("test.tsv")
 
     if not os.path.exists(path):
-        st.error("❌ test.tsv file not found in project directory")
+        st.error("❌ test.tsv file not found in project folder")
         return pd.DataFrame()
 
     try:
@@ -74,6 +65,7 @@ def load_test_data():
             ],
             on_bad_lines="skip"
         )
+
         return df
 
     except Exception as e:
@@ -81,9 +73,8 @@ def load_test_data():
         return pd.DataFrame()
 
 # -----------------------------
-# LOAD LABEL MAP (FIXED LOGIC)
+# CREATE LABEL MAP
 # -----------------------------
-@st.cache_resource
 def load_statement_labels(df):
     label_map = {}
 
@@ -97,13 +88,12 @@ def load_statement_labels(df):
     return label_map
 
 # -----------------------------
-# SIMPLE PREDICTION LOGIC (FIXED)
+# PREDICTION LOGIC (FIXED)
 # -----------------------------
-def predict_news(text):
+def predict_news(text, label_map):
     clean_text = preprocess_text(text)
 
-    # match against dataset
-    for stmt, label in STATEMENT_LABELS.items():
+    for stmt, label in label_map.items():
         if clean_text in stmt or stmt in clean_text:
             if label in ["false", "pants-fire"]:
                 return "FAKE NEWS", 0.95
@@ -125,26 +115,27 @@ def main():
 
     # SHOW DATASET
     st.subheader("📊 Dataset Preview")
+
     if not test_df.empty:
         st.dataframe(test_df.head(20))
     else:
-        st.warning("Dataset is empty or failed to load")
+        st.warning("Dataset is empty or not loaded")
 
-    # CREATE LABEL MAP
-    global STATEMENT_LABELS
+    # LABEL MAP
     STATEMENT_LABELS = load_statement_labels(test_df)
 
     # USER INPUT
-    st.subheader("🧠 Test Your News")
-    user_statement = st.text_area("Enter a news statement:", height=150)
+    st.subheader("🧠 Test Your News Statement")
+
+    user_statement = st.text_area("Enter news text:", height=150)
 
     if st.button("Detect News"):
         if user_statement.strip() == "":
             st.warning("Please enter a statement")
         else:
-            result, confidence = predict_news(user_statement)
+            result, confidence = predict_news(user_statement, STATEMENT_LABELS)
 
-            st.write("### Result:")
+            st.write("### Result")
             st.write(f"Confidence: {confidence:.2f}")
 
             if result == "REAL NEWS":
@@ -152,7 +143,7 @@ def main():
             else:
                 st.error(result)
 
-    # DEBUG SECTION
+    # DEBUG OPTION
     if st.checkbox("Show full dataset"):
         st.dataframe(test_df)
 
