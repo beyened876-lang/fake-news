@@ -41,7 +41,7 @@ def preprocess_text(text):
     )
 
 # -----------------------------
-# LOAD DATASET (SAFE VERSION)
+# LOAD DATASET
 # -----------------------------
 def load_test_data():
     path = data_path("test.tsv")
@@ -65,7 +65,6 @@ def load_test_data():
             ],
             on_bad_lines="skip"
         )
-
         return df
 
     except Exception as e:
@@ -88,7 +87,7 @@ def load_statement_labels(df):
     return label_map
 
 # -----------------------------
-# PREDICTION LOGIC (FIXED)
+# PREDICTION LOGIC
 # -----------------------------
 def predict_news(text, label_map):
     clean_text = preprocess_text(text)
@@ -113,16 +112,14 @@ def main():
     # LOAD DATASET
     test_df = load_test_data()
 
-    # SHOW DATASET
-    st.subheader("📊 Dataset Preview")
-
-    if not test_df.empty:
-        st.dataframe(test_df.head(20))
-    else:
-        st.warning("Dataset is empty or not loaded")
-
     # LABEL MAP
     STATEMENT_LABELS = load_statement_labels(test_df)
+
+    # INFO ONLY (NO DUPLICATE TABLE)
+    if not test_df.empty:
+        st.info(f"📊 Dataset loaded successfully with {len(test_df)} records")
+    else:
+        st.warning("Dataset is empty or not loaded")
 
     # USER INPUT
     st.subheader("🧠 Test Your News Statement")
@@ -143,7 +140,7 @@ def main():
             else:
                 st.error(result)
 
-    # DEBUG OPTION
+    # OPTIONAL DEBUG VIEW
     if st.checkbox("Show full dataset"):
         st.dataframe(test_df)
 
