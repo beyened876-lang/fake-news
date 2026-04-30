@@ -9,14 +9,10 @@ import pandas as pd
 import streamlit as st
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_FILES = {
     'lr_model': 'lr_model.pkl',
     'rf_model': 'rf_model.pkl',
-    'lstm_model': 'lstm_model.h5',
     'tfidf': 'tfidf.pkl',
     'tokenizer': 'tokenizer.pkl',
 }
@@ -51,8 +47,7 @@ def load_models():
     with open(data_path(MODEL_FILES['tokenizer']), 'rb') as f:
         tokenizer = pickle.load(f)
 
-    return lr_model, rf_model, tfidf, tokenizer, lstm_model
-
+   return lr_model, rf_model, tfidf
 
 @st.cache_resource
 def get_models():
