@@ -9,7 +9,6 @@ import pandas as pd
 import streamlit as st
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 
@@ -52,7 +51,6 @@ def load_models():
     with open(data_path(MODEL_FILES['tokenizer']), 'rb') as f:
         tokenizer = pickle.load(f)
 
-    lstm_model = load_model(data_path(MODEL_FILES['lstm_model']))
     return lr_model, rf_model, tfidf, tokenizer, lstm_model
 
 
