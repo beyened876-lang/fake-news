@@ -3,6 +3,8 @@ import pickle
 import re
 
 import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
 import pandas as pd
 import streamlit as st
 from nltk.corpus import stopwords
